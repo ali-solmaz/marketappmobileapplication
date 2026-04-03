@@ -4,55 +4,59 @@ import 'package:path/path.dart';
 class DBHelper {
   static Database? _db;
 
-  // Veritabanını aç (yoksa oluştur)
   static Future<Database> getDB() async {
-    if (_db != null) return _db!; // zaten açıksa tekrar açma
+    if (_db != null) return _db!;
 
-    final path = join(await getDatabasesPath(), 'urunler.db'); // telefonda dosya yolu
+    final path = join(await getDatabasesPath(), 'urunler.db');
 
     _db = await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) {
-        // tablo ilk seferinde oluşturulur
-        return db.execute('''
-          CREATE TABLE sepet (
-            id INTEGER PRIMARY KEY,        
-            name TEXT,
-            price REAL,
-            adet INTEGER                   
+        db.execute('''
+          CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            token TEXT
           )
         ''');
+        db.execute('''
+          CREATE TABLE sepet (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            price REAL,
+            adet INTEGER
+          )
+        ''');
+        db.execute('''
+            CREATE TABLE users (
+              id INTEGER PRIMARY KEY,
+              token TEXT
+            )
+        ''');
+
       },
     );
 
     return _db!;
   }
 
-  // Ürün ekle
   static Future<void> insert(Map<String, dynamic> urun) async {
     final db = await getDB();
-    print('DB Insert: $urun');
-    // Aynı ID varsa adet artır, yoksa yeni ekle
     await db.insert('sepet', urun,
-        conflictAlgorithm: ConflictAlgorithm.replace);  // ← urunler yerine sepet
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // Tüm ürünleri sil (temizle)
   static Future<void> clear() async {
     final db = await getDB();
     await db.delete('sepet');
   }
 
-  // Tüm ürünleri getir
   static Future<List<Map<String, dynamic>>> getAll() async {
     final db = await getDB();
     final result = await db.query('sepet');
-    print('DB GetAll: $result');
     return result;
   }
 
-  // Ürün sil
   static Future<void> delete(int id) async {
     final db = await getDB();
     await db.delete('sepet', where: 'id = ?', whereArgs: [id]);
@@ -69,6 +73,24 @@ class DBHelper {
   }
   static Future<void> clearSepet() async {
     final db = await getDB();
-    await db.delete('sepet'); // tüm satırları sil
+    await db.delete('sepet');
+  }
+
+  static Future<void> saveToken(String token) async {
+    final db = await getDB();
+    await db.delete('users');
+    await db.insert('users', {'token': token});
+  }
+
+  static Future<String?> getToken() async {
+    final db = await getDB();
+    final result = await db.query('users', limit: 1);
+    if (result.isEmpty) return null;
+    return result.first['token'] as String?;
+  }
+
+  static Future<void> deleteToken() async {
+    final db = await getDB();
+    await db.delete('users');
   }
 }

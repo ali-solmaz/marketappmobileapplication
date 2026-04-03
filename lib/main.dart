@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'db_helper.dart';
+import 'AuthService.dart';
+import 'LoginScreen.dart';
 import 'package:marketapp2/SiparisFormScreen.dart';
 void main() {
   runApp(const MyApp());
@@ -16,8 +18,48 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const AnaSayfa(title: 'AnaSayfa'),
+      home: const AuthCheck(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const AnaSayfa(title: 'AnaSayfa'),
+      },
     );
+  }
+}
+
+// Token kontrolü
+class AuthCheck extends StatefulWidget {
+  const AuthCheck({super.key});
+
+  @override
+  State<AuthCheck> createState() => _AuthCheckState();
+}
+
+class _AuthCheckState extends State<AuthCheck> {
+  final AuthService _authService = AuthService();
+  bool _loading = true;
+  bool _isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final token = await _authService.getToken();
+    setState(() {
+      _isLoggedIn = token != null;
+      _loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return _isLoggedIn ? const AnaSayfa(title: 'AnaSayfa') : const LoginScreen();
   }
 }
 
@@ -64,7 +106,9 @@ class _AnaSayfaState extends State<AnaSayfa> {
             )
           ],
         ),
-            body: GridView.count(
+            body: loading
+                ? Center(child: CircularProgressIndicator())
+                : GridView.count(
                 crossAxisCount: 2,
                 padding: EdgeInsets.all(12),
                 crossAxisSpacing: 12,
@@ -122,8 +166,7 @@ class _AnaSayfaState extends State<AnaSayfa> {
                       ),
                     )
                 ],
-
-    ),
+            ),
     );
   }
 }

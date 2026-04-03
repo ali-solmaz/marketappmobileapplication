@@ -47,9 +47,6 @@ class _SiparisFormScreenState extends State<SiparisFormScreen> {
       body: json.encode(body),
     );
 
-    print('Status: ${response.statusCode}');
-    print('Response: ${response.body}');
-
     setState(() => yukleniyor = false);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
