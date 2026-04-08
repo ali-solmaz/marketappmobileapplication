@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'db_helper.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:marketapp2/UserPrefs.dart';
 class AuthService {
-  final String baseUrl = "http://192.168.0.27:5043/api";
+  final String baseUrl = "http://192.168.0.18:5239/api";
 
   Future<bool> login(String username, String password) async {
     final url = "$baseUrl/auth/login";
@@ -20,8 +21,15 @@ class AuthService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      print(data);
       final token = data["token"];
+      final userId = data["Id"];
+
       await DBHelper.saveToken(token);
+
+      print(userId.toString());
+      await UserPrefs.saveUserId(userId);
+
       return true;
     }
     return false;

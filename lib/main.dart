@@ -5,7 +5,15 @@ import 'db_helper.dart';
 import 'AuthService.dart';
 import 'LoginScreen.dart';
 import 'package:marketapp2/SiparisFormScreen.dart';
+import 'package:flutter/foundation.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+
 void main() {
+  if (!kIsWeb) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   runApp(const MyApp());
 }
 
@@ -72,7 +80,6 @@ class AnaSayfa extends StatefulWidget {
 }
 
 class _AnaSayfaState extends State<AnaSayfa> {
-
   List products = [];
   bool loading = true;
 
@@ -83,13 +90,17 @@ class _AnaSayfaState extends State<AnaSayfa> {
   }
 
   Future<void> fetchProducts() async {
-    final res = await http.get(Uri.parse('http://192.168.0.27:5043/api/product'));
+    final res = await http.get(Uri.parse('http://192.168.0.18:5239/api/product'));
     setState(() {
       products = json.decode(res.body)['\$values'];
       loading = false;
     });
   }
 
+  void printDbPath() async {
+    final path = await getDatabasesPath();
+    print("DATABASE PATH: $path");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +124,7 @@ class _AnaSayfaState extends State<AnaSayfa> {
                 padding: EdgeInsets.all(12),
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 0.73,
+                childAspectRatio: 0.63,
                 children: [
                   for(var p in products)
                     Card(
@@ -145,6 +156,7 @@ class _AnaSayfaState extends State<AnaSayfa> {
                             padding: EdgeInsets.all(8),
                             child: ElevatedButton(
                               onPressed: () async {
+                                printDbPath();
                                 await DBHelper.insert({
                                   'id': p['Id'],
                                   'name': p['Name'],

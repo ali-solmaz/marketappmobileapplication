@@ -1,5 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
   static Database? _db;
@@ -7,7 +10,7 @@ class DBHelper {
   static Future<Database> getDB() async {
     if (_db != null) return _db!;
 
-    final path = join(await getDatabasesPath(), 'urunler.db');
+    final path = join(await getDatabasesPath(), 'marketapp.db');
 
     _db = await openDatabase(
       path,
@@ -17,7 +20,7 @@ class DBHelper {
           CREATE TABLE users (
             id INTEGER PRIMARY KEY,
             token TEXT
-          )
+            )
         ''');
         db.execute('''
           CREATE TABLE sepet (
@@ -27,13 +30,6 @@ class DBHelper {
             adet INTEGER
           )
         ''');
-        db.execute('''
-            CREATE TABLE users (
-              id INTEGER PRIMARY KEY,
-              token TEXT
-            )
-        ''');
-
       },
     );
 
@@ -79,7 +75,10 @@ class DBHelper {
   static Future<void> saveToken(String token) async {
     final db = await getDB();
     await db.delete('users');
-    await db.insert('users', {'token': token});
+    await db.insert('users', {'token': token},);
+
+
+    //await db.insert('user', {'userId': userId});
   }
 
   static Future<String?> getToken() async {
@@ -93,4 +92,5 @@ class DBHelper {
     final db = await getDB();
     await db.delete('users');
   }
+
 }

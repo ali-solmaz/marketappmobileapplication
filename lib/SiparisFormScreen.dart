@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'db_helper.dart';
-
-
+import 'UserPrefs.dart';
 class SiparisFormScreen extends StatefulWidget {
   final List<Map<String, dynamic>> sepet;
   final double toplam;
@@ -24,25 +23,27 @@ class _SiparisFormScreenState extends State<SiparisFormScreen> {
   Future<void> siparisGonder() async {
     setState(() => yukleniyor = true);
 
+    final userId = await UserPrefs.getUserId();
+
     final body = {
-      "customerName": adController.text,
-      "customerLastName": soyadController.text,
-      "telephone": telefonController.text,
-      "address": adresController.text,
-      "totalPrice": widget.toplam,
-      "state": "Beklemede",
-      "orderTime": DateTime.now().toIso8601String(),
-      "details": widget.sepet.map((p) => {
-        "productId": p['id'],
-        "piece": p['adet'],
-        "unitPrice": p['price'],
+      "UserId": userId,
+      "CustomerName": adController.text.trim(),
+      "CustomerLastName": soyadController.text.trim(),
+      "Telephone": telefonController.text.trim(),
+      "Address": adresController.text.trim(),
+      "TotalPrice": widget.toplam,
+      "State": "Beklemede",
+      "OrderTime": DateTime.now().toIso8601String(),
+      "Details": widget.sepet.map((p) => {
+        "ProductId": int.parse(p['id'].toString()),
+        "Piece": int.parse(p['adet'].toString()),
+        "UnitPrice": double.parse(p['price'].toString()),
       }).toList(),
     };
-
     print('Siparis: ${json.encode(body)}');
 
     final response = await http.post(
-      Uri.parse('http://192.168.0.27:5043/api/Order'),
+      Uri.parse('http://192.168.0.18:5239/api/Order'),
       headers: {"Content-Type": "application/json"},
       body: json.encode(body),
     );

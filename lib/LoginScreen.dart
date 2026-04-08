@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
+    print('selam '+_usernameController.text+', '+ _passwordController.text);
     setState(() {
       _loading = true;
       _error = null;
@@ -96,7 +97,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _loading ? null : _login,
+                    onPressed: () {
+                      print('durmusali');
+                      _login();
+                    },
                     child: _loading
                         ? const SizedBox(
                             height: 20,
