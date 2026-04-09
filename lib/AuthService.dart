@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'db_helper.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:marketapp2/UserPrefs.dart';
+import 'data/db_helper.dart';
+
 class AuthService {
   final String baseUrl = "http://192.168.0.18:5239/api";
 
@@ -12,12 +11,8 @@ class AuthService {
     final response = await http.post(
       Uri.parse(url),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "username": username,
-        "password": password,
-      }),
+      body: jsonEncode({"username": username, "password": password}),
     );
-
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -25,10 +20,10 @@ class AuthService {
       final token = data["token"];
       final userId = data["Id"];
 
-      await DBHelper.saveToken(token);
+      await DBHelper.saveTokenandApiUserID(token, userId);
 
       print(userId.toString());
-      await UserPrefs.saveUserId(userId);
+      //await UserPrefs.saveUserId(userId);
 
       return true;
     }

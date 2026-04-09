@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'db_helper.dart';
-import 'UserPrefs.dart';
+import 'data/db_helper.dart';
+//import 'UserPrefs.dart';
+
 class SiparisFormScreen extends StatefulWidget {
   final List<Map<String, dynamic>> sepet;
   final double toplam;
 
-  const SiparisFormScreen({required this.sepet, required this.toplam});
+  const SiparisFormScreen({
+    super.key,
+    required this.sepet,
+    required this.toplam,
+  });
 
   @override
   State<SiparisFormScreen> createState() => _SiparisFormScreenState();
@@ -22,9 +27,7 @@ class _SiparisFormScreenState extends State<SiparisFormScreen> {
 
   Future<void> siparisGonder() async {
     setState(() => yukleniyor = true);
-
-    final userId = await UserPrefs.getUserId();
-
+    final userId = await DBHelper.getUserId();
     final body = {
       "UserId": userId,
       "CustomerName": adController.text.trim(),
@@ -34,11 +37,15 @@ class _SiparisFormScreenState extends State<SiparisFormScreen> {
       "TotalPrice": widget.toplam,
       "State": "Beklemede",
       "OrderTime": DateTime.now().toIso8601String(),
-      "Details": widget.sepet.map((p) => {
-        "ProductId": int.parse(p['id'].toString()),
-        "Piece": int.parse(p['adet'].toString()),
-        "UnitPrice": double.parse(p['price'].toString()),
-      }).toList(),
+      "Details": widget.sepet
+          .map(
+            (p) => {
+              "ProductId": int.parse(p['id'].toString()),
+              "Piece": int.parse(p['adet'].toString()),
+              "UnitPrice": double.parse(p['price'].toString()),
+            },
+          )
+          .toList(),
     };
     print('Siparis: ${json.encode(body)}');
 
@@ -52,14 +59,14 @@ class _SiparisFormScreenState extends State<SiparisFormScreen> {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       await DBHelper.clearSepet();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Siparişiniz alındı!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Siparişiniz alındı!')));
       Navigator.popUntil(context, (route) => route.isFirst);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hata: ${response.statusCode}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Hata: ${response.statusCode}')));
     }
   }
 
@@ -71,10 +78,23 @@ class _SiparisFormScreenState extends State<SiparisFormScreen> {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(controller: adController, decoration: InputDecoration(labelText: 'Ad')),
-            TextField(controller: soyadController, decoration: InputDecoration(labelText: 'Soyad')),
-            TextField(controller: telefonController, decoration: InputDecoration(labelText: 'Telefon'), keyboardType: TextInputType.phone),
-            TextField(controller: adresController, decoration: InputDecoration(labelText: 'Adres')),
+            TextField(
+              controller: adController,
+              decoration: InputDecoration(labelText: 'Ad'),
+            ),
+            TextField(
+              controller: soyadController,
+              decoration: InputDecoration(labelText: 'Soyad'),
+            ),
+            TextField(
+              controller: telefonController,
+              decoration: InputDecoration(labelText: 'Telefon'),
+              keyboardType: TextInputType.phone,
+            ),
+            TextField(
+              controller: adresController,
+              decoration: InputDecoration(labelText: 'Adres'),
+            ),
             SizedBox(height: 24),
             ElevatedButton(
               onPressed: yukleniyor ? null : siparisGonder,
@@ -84,7 +104,10 @@ class _SiparisFormScreenState extends State<SiparisFormScreen> {
               ),
               child: yukleniyor
                   ? CircularProgressIndicator(color: Colors.white)
-                  : Text('Siparişi Gönder', style: TextStyle(color: Colors.white)),
+                  : Text(
+                      'Siparişi Gönder',
+                      style: TextStyle(color: Colors.white),
+                    ),
             ),
           ],
         ),

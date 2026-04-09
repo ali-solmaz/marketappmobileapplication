@@ -39,8 +39,12 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   sqflite_common_ffi: ^2.4.0+2
+  drift: ^2.32.1
+  drift_flutter: ^0.3.0
 
 dev_dependencies:
+  drift_dev: ^2.32.1
+  build_runner: ^2.4.0
   flutter_test:
     sdk: flutter
 

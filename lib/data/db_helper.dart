@@ -1,8 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:sqflite/sqflite.dart';
+import 'package:marketapp2/data/migration/migrationQuery.dart';
 
 class DBHelper {
   static Database? _db;
@@ -14,22 +12,16 @@ class DBHelper {
 
     _db = await openDatabase(
       path,
-      version: 2,
+      version: migraitons.length,
       onCreate: (db, version) {
-        db.execute('''
-          CREATE TABLE users (
-            id INTEGER PRIMARY KEY,
-            token TEXT
-            )
-        ''');
-        db.execute('''
-          CREATE TABLE sepet (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            price REAL,
-            adet INTEGER
-          )
-        ''');
+        for (var query in migraitons) {
+          db.execute(query);
+        }
+      },
+      onUpgrade: (db, oldversion, newversion) async {
+        for (int i = oldversion; i < newversion; i++) {
+          db.execute(migraitons[i]);
+        }
       },
     );
 
@@ -38,8 +30,11 @@ class DBHelper {
 
   static Future<void> insert(Map<String, dynamic> urun) async {
     final db = await getDB();
-    await db.insert('sepet', urun,
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'sepet',
+      urun,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<void> clear() async {
@@ -67,18 +62,16 @@ class DBHelper {
       whereArgs: [id],
     );
   }
+
   static Future<void> clearSepet() async {
     final db = await getDB();
     await db.delete('sepet');
   }
 
-  static Future<void> saveToken(String token) async {
+  static Future<void> saveTokenandApiUserID(String token, int apiUserId) async {
     final db = await getDB();
     await db.delete('users');
-    await db.insert('users', {'token': token},);
-
-
-    //await db.insert('user', {'userId': userId});
+    await db.insert('users', {'token': token, 'apiUserId': apiUserId});
   }
 
   static Future<String?> getToken() async {
@@ -93,4 +86,15 @@ class DBHelper {
     await db.delete('users');
   }
 
+  static Future<int> getUserId() async {
+    final db = await getDB();
+    List<Map<String, dynamic>> result = await db.query(
+      'users',
+      where: 'id = 1',
+    );
+
+    int apiUserID = result.first['apiUserId'];
+
+    return apiUserID;
+  }
 }

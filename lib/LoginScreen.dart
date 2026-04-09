@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
-    print('selam '+_usernameController.text+', '+ _passwordController.text);
+    print('selam ${_usernameController.text}, ${_passwordController.text}');
     setState(() {
       _loading = true;
       _error = null;
@@ -89,10 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
                 if (_error != null)
-                  Text(
-                    _error!,
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                  Text(_error!, style: const TextStyle(color: Colors.red)),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
