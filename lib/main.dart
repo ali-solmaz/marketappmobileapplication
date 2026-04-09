@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'data/db_helper.dart';
-import 'AuthService.dart';
-import 'LoginScreen.dart';
-import 'package:marketapp2/SiparisFormScreen.dart';
+import 'services/AuthService.dart';
+import 'screens/LoginScreen.dart';
+import 'package:marketapp2/screens/SiparisFormScreen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 

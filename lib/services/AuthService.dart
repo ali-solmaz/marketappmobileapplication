@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'data/db_helper.dart';
+import '../data/db_helper.dart';
 
 class AuthService {
   final String baseUrl = "http://192.168.0.18:5239/api";
